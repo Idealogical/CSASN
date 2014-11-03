@@ -1,0 +1,282 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * solution file for DLinkedList Assignment Fall 2014
+ *
+ * @author lkfritz
+ * @editor CMSlade
+ * @param <T>
+ */
+
+public class DLinkedList<T extends Comparable<T>>{
+
+    //main method
+    public static void main(String[] args) throws FileNotFoundException {
+
+        DLinkedList<String> lst1 = new DLinkedList<>();
+        DLinkedList<String> lst2 = new DLinkedList<>();
+
+        Scanner darkly = new Scanner(new File("text1.in"));
+        String str;
+
+        //populate lst1
+        while (darkly.hasNext()) {
+            str = darkly.next();
+            str = cleanUp(str);
+            lst1.insertOrderUnique(str);
+        }
+        darkly.close();
+        darkly = new Scanner(new File("text2.in"));
+
+        //populate lst2
+        while (darkly.hasNext()) {
+            str = darkly.next();
+            str = cleanUp(str);
+            lst2.insertOrderUnique(str);
+        }
+
+        //display the lists
+        System.out.println("list1: " + lst1);
+        System.out.println("list2: " + lst2);
+        
+        //merge the lists into result
+        DLinkedList<String> result = lst1.merge(lst2);
+        
+        //display the lists after merge
+        System.out.println("list1: " + lst1);
+        System.out.println("list2: " + lst2);
+        System.out.println("result: " + result);
+        
+    }
+    
+    /**
+     * ASSIGNED METHOD - DO NOT CHANGE SIGNATURE
+     * remove any leading and trailing non-alpha chars from 
+     * @param str
+     * 
+     * @return updated str in all lower case
+     */
+    public static String cleanUp(String str){
+       //loop through characters
+        for(int i =0; i < str.length();i++){
+            //change characters
+           str = str.replace("[^a-zA-Z]", "").toLowerCase();
+        }
+        
+        return str;
+    }
+
+
+    //inner DNode class:  PROVIDED
+    private class DNode {
+
+        private DNode next, prev;
+        private T data;
+
+        private DNode(T val) {
+            this.data = val;
+            next = prev = this;
+        }
+    }
+
+    //DLinkedList fields:  PROVIDED
+    private DNode header;
+
+    //create an empty list:  PROVIDED
+    public DLinkedList() {
+        header = new DNode(null);
+    }   
+
+    //PROVIDED
+    @Override
+    public String toString() {
+        String str = "[";
+        DNode curr = header.next;
+        while (curr != header) {
+            str += curr.data + " ";
+            curr = curr.next;
+        }
+        if(str.length()>1)
+            str = str.substring(0, str.length() - 1);
+        return str + "]";
+    }
+
+    /**
+     * ASSIGNED METHOD - DO NOT CHANGE SIGNATURE
+     * 
+     * remove 
+     * @param val from list
+     * @return true if successful, false otherwise
+     */
+    public boolean remove(T val) { 
+         DNode curr = header.next;
+while (curr != header) {
+    if (curr.data == val) 
+    {
+    curr.prev.next = curr.next;
+    curr.next.prev = curr.prev;
+}
+curr = curr.next;
+}
+        return true;
+    }
+    
+
+    /**
+     * ASSIGNED METHOD - DO NOT CHANGE SIGNATURE
+     *
+     * insert
+     * @param item into list so that list remains in ascending order
+     */
+
+    public void insertOrder(T item) { 
+     
+      
+        
+        if( this.header.prev.data == null){
+            header.prev = null;
+            item = (T) (DNode)  header.next;
+            header.prev = header.prev.prev;
+            Collections.sort((List<T>) header.data );
+         
+        }
+        else {
+            item  = (T) (DNode) header.next.prev.data;
+            header.prev = header.prev.prev;
+            header.next = header.prev;
+            }
+            Collections.sort((List<T>) header.data);
+            
+        }
+ 
+   
+   
+    
+      
+      
+    
+
+    /**
+     * ASSIGNED METHOD - DO NOT CHANGE SIGNATURE
+     *
+     * insert
+     * @param item into list if item is not already in the list
+     * list must remain in ascending order
+     * return true if item is inserted, false otherwise
+     * @return 
+     * 
+     */
+
+    public boolean insertOrderUnique(T item) { 
+    DNode curr = header.next;
+// Move to the first node that belongs after item
+while (curr != header && item.compareTo(curr.data) > 0) {
+curr = curr.next;
+}
+// Connect node containing item to previous and following nodes unless
+// they are equal
+if (curr == header || item.compareTo(curr.data) != 0 ) {
+DNode newNode = new DNode(item);
+newNode.prev = curr.prev;
+newNode.next = curr;
+curr.prev.next = newNode;
+curr.prev = newNode;
+}
+    
+     else if(header.data == item){
+        remove(item);
+        
+    }
+    return false;
+    
+        
+    
+        
+       
+       
+       
+    }
+
+    /**
+     * ASSIGNED METHOD - DO NOT CHANGE SIGNATURE
+     * 
+     * merge this list and 
+     * @param rhs
+     * @return list that contains merged list
+     * return list must not contain duplicates and must remain in ascending 
+     * order
+     * both rhs and this must be empty lists when method returns
+     */
+    public DLinkedList merge(DLinkedList rhs) {
+        DLinkedList result = new DLinkedList();
+        //assign rhs
+       rhs = (DLinkedList) this.header.next.data;
+       //current place in result list
+       DNode curr = result.header.next;
+       //create 2nd list
+      DLinkedList thisList = new DLinkedList();
+      //and assign
+      thisList = (DLinkedList) curr.data;
+      //iterator for rhs
+      DNode lst2 = rhs.header.next;
+      //iterator for thisList
+     DNode thisL = this.header.next;
+     
+     //Find values that come first
+     while(thisL != header && lst2 != rhs.header){
+         //lst2 list is before  @thisL 
+         if(thisL.data.compareTo(lst2.data) > 0){
+             curr.next = lst2;
+             lst2.prev = curr;
+             lst2 = lst2.next;
+             curr = curr.next;
+         } 
+         //thisL is before lst2
+         else if(thisL.data.compareTo(lst2.data)<0){
+             curr.next = thisL;
+             thisL.prev = curr;
+             thisL = thisL.next;
+             curr =curr.next;
+                     
+                     
+         }
+         //they are equal lists
+         else{
+             curr.next = thisL;
+             thisL.prev = curr;
+             thisL = thisL.next;
+             lst2 = lst2.next;
+             curr = curr.next;
+         }
+         
+        
+       //exit this loop  
+     }
+     //if either is empty
+     while(thisL != header){
+         curr.next = thisL;
+         thisL.prev = curr;
+         thisL = thisL.next;
+         curr = curr.next;
+     }
+      while(lst2 != rhs.header){
+         curr.next = curr;
+         lst2.prev = curr;
+         lst2 = lst2.next;
+         curr =curr.next;
+      }
+      //clear out the lists
+      header.next = header;
+      header.prev = header;
+      rhs.header.next = rhs.header;
+      rhs.header.prev = rhs.header;
+      
+      
+      //return the result
+        return result;
+    }
+}
